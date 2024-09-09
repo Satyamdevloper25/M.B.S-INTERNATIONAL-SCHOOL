@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Calendar</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f4f4f4;
+}
+
+.calendar {
+    width: 300px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+#month-year {
+    margin: 0;
+}
+
+.calendar-body {
+    padding: 10px;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.day {
+    text-align: center;
+    font-weight: bold;
+}
+
+.calendar-dates {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.date {
+    text-align: center;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.date:hover {
+    background-color: #f0f0f0;
+}
+
+    </style>
+    <div class="calendar">
+        <div class="calendar-header">
+            <button id="prev-month">&lt;</button>
+            <h2 id="month-year"></h2>
+            <button id="next-month">&gt;</button>
+        </div>
+        <div class="calendar-body">
+            <div class="calendar-days">
+                <div class="day">Sun</div>
+                <div class="day">Mon</div>
+                <div class="day">Tue</div>
+                <div class="day">Wed</div>
+                <div class="day">Thu</div>
+                <div class="day">Fri</div>
+                <div class="day">Sat</div>
+            </div>
+            <div class="calendar-dates" id="calendar-dates"></div>
+        </div>
+    </div>
+    <script >
+        document.addEventListener('DOMContentLoaded', () => {
+    const monthYearElement = document.getElementById('month-year');
+    const calendarDatesElement = document.getElementById('calendar-dates');
+    const prevMonthButton = document.getElementById('prev-month');
+    const nextMonthButton = document.getElementById('next-month');
+
+    let currentDate = new Date();
+
+    function renderCalendar() {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+
+        // Set month and year in the header
+        monthYearElement.textContent = `${currentDate.toLocaleString('default', { month: 'long' })} ${year}`;
+
+        // Get the first day of the month
+        const firstDay = new Date(year, month, 1).getDay();
+        // Get the number of days in the month
+        const totalDays = new Date(year, month + 1, 0).getDate();
+
+        // Create the calendar dates
+        calendarDatesElement.innerHTML = '';
+
+        // Fill in the days before the start of the month
+        for (let i = 0; i < firstDay; i++) {
+            calendarDatesElement.innerHTML += '<div class="date"></div>';
+        }
+
+        // Fill in the days of the month
+        for (let i = 1; i <= totalDays; i++) {
+            calendarDatesElement.innerHTML += `<div class="date">${i}</div>`;
+        }
+    }
+
+    prevMonthButton.addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        renderCalendar();
+    });
+
+    nextMonthButton.addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        renderCalendar();
+    });
+
+    // Initial render
+    renderCalendar();
+});
+
+    </script>
+</body>
+</html>
