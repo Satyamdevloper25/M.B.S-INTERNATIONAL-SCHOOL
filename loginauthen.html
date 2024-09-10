@@ -195,12 +195,12 @@
       </form>
     </div>
   </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-    // Initialize Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyAyf4UxAJlsT3EjbNIVqCKQ4cjecrRgI0A",
         authDomain: "myauth-78eab.firebaseapp.com",
@@ -210,83 +210,50 @@
         appId: "1:1081084619188:web:cb90c0140814cc6cfa2ae1"
     };
 
-
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    let currentUser = null;
+    const form = document.getElementById('login-form');
+    form.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
 
-    // Authenticate user
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            currentUser = user;  // Set the current user
-            console.log("User authenticated:", currentUser);
-
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
             const userDoc = await getDoc(doc(db, "users", user.uid));
+
             if (userDoc.exists()) {
                 const role = userDoc.data().role;
+                localStorage.setItem('userRole', role);
 
-                if (role === 'admin') {
-                    document.getElementById('submit-btn').style.display = 'block';  // Show submit button for admin
+                if (email === 'satyam02@gmail.com') {  // Replace with the admin email you want to check
+                    window.location.href = "index.html";
                 } else {
-                    document.getElementById('submit-btn').style.display = 'none';  // Hide submit button for teachers
+                    window.location.href = "teacher.html"; // Redirect to teacher page if not the specific admin
                 }
-
-                loadAttendance();  // Load attendance records
             } else {
-                console.error("No role found for user:", user.uid);
+                alert('No role found, please log in again.');
             }
-        } else {
-            console.error("User is not authenticated.");
+        } catch (error) {
+            console.error("Error during sign-in:", error);
+            alert('Error: ' + error.message);
         }
     });
 
-    // Load attendance records
-    async function loadAttendance() {
-        if (currentUser) {
-            const attendanceRef = collection(db, "teachers", currentUser.uid, "attendance");
-            const querySnapshot = await getDocs(query(attendanceRef));
-
-            const attendanceTable = document.getElementById('attendance-table').querySelector('tbody');
-            attendanceTable.innerHTML = '';  // Clear previous entries
-
-            querySnapshot.forEach((doc) => {
-                const attendance = doc.data();
-                const row = document.createElement('tr');
-                row.innerHTML = `<td>${attendance.date}</td><td>${attendance.status}</td>`;
-                attendanceTable.appendChild(row);
-            });
-        } else {
-            console.error("No authenticated user found during attendance load.");
-        }
-    }
-
-    // Event listener for admin to submit attendance
-    document.getElementById('submit-btn').addEventListener('click', async () => {
-        const date = document.getElementById('date').value;
-        const status = document.getElementById('status').value;
-        const teacherUID = document.getElementById('teacher-uid').value;
-
-        if (currentUser && date && status && teacherUID) {
-            try {
-                const attendanceRef = collection(db, "teachers", teacherUID, "attendance");
-                await addDoc(attendanceRef, {
-                    date: date,
-                    status: status
-                });
-                alert('Attendance recorded successfully');
-                loadAttendance();  // Reload the attendance records
-            } catch (error) {
-                console.error("Error adding attendance:", error);
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const role = localStorage.getItem('userRole');
+            if (role === 'admin') {
+                window.location.href = "index.html";
+            } else if (role === 'teacher') {
+                window.location.href = "teacher.html";
             }
-        } else {
-            alert('Please fill in all fields');
         }
     });
-</script>
-
-
+  </script>
 
 </body>
 </html>
